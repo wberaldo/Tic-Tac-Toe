@@ -10,9 +10,19 @@
 <body>
     <div class="game"></div>
 
+    <div class='score'>
+        <p class="PlayerX"></p>
+        <p class="PlayerO"></p>
+    </div>
+
+    <div class="winner"></div>
+    <div class="center">
+        <a onclick="tic_tac_toe.start()" class="btn">Reiniciar Jogo</a>
+    </div>
+
     <script src="js/tic-tac-toe.js"></script>
     <script>
-        tic_tac_toe.init (document.querySelector('.game'));
+        tic_tac_toe.init(document.querySelector('.game'),  document.querySelector('.PlayerX'), document.querySelector('.PlayerO'), document.querySelector('.winner'));
         tic_tac_toe.start();
     </script>
 </body>

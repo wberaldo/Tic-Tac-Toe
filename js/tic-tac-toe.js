@@ -1,7 +1,12 @@
 const tic_tac_toe = {
     board: ['','','','','','','','',''],
+    player_x_wins: 0,
+    player_o_wins: 0,
+    player_x_element: null,
+    player_o_element: null,
+    won_message_element: null,
     symbols: {
-        options: ['X', 'O'],
+        options: ['x', 'o'],
         turn_index: 0,
         change: function(){
             this.turn_index = (this.turn_index === 0 ? 1 : 0);
@@ -20,38 +25,74 @@ const tic_tac_toe = {
         [2,4,6]
     ],
 
-    init: function(container){
+    init: function(container, player_x_text, player_o_text, won_message_text){
         this.container_element = container;
+        this.player_x_element = player_o_text;
+        this.player_o_element = player_x_text;
+        this.won_message_element = won_message_text;
     },
 
     make_play: function(position){
-        if (this.gameover) return false;
-        if (this.board[position] === ''){
-            this.board[position] = this.symbols.options [this.symbols.turn_index];
+        if (this.gameover){
+        	this.restart()
+        } else if (this.board[position] !== '') {
+        	return false;
+        } else {
+	        const currentSymbol = this.symbols.options[this.symbols.turn_index];
+	        this.board[position] = currentSymbol;
             this.draw();
-            let winning_sequences_index = this.check_win_seqs(this.symbols.options [this.symbols.turn_index]);
-            if (winning_sequences_index >= 0){
-                this.game_is_over();
-            }else {
-                this.symbols.change();
+        const winning_sequences_index = this.check_win_seqs(currentSymbol);
+	        if (this.is_game_over()){
+	            this.game_is_over();
+	        }
+	        if (winning_sequences_index >= 0) {
+	            this.game_is_over();
+	            this.stylize_winner_sequence(this.winning_sequences[winning_sequences_index]);
+	        } else {
+	            this.symbols.change();
             }
             return true;
-        } else {
-            return false;
         }
-
     },
+
+    stylize_winner_sequence(winner_sequence) {
+        const winning_class = 'winner winner--' + winner_sequence.join('-');
+        
+        winner_sequence.forEach((position) => {
+            this
+              .container_element
+              .querySelector(`div:nth-child(${position + 1})`)
+              .classList = winning_class;
+          });
+        },
 
     game_is_over: function(){
         this.gameover = true;
-        console.log("GAME OVER!");
+        this.symbols.turn_index === 0 ? this.player_x_wins++ : this.player_o_wins++;
+        this.won_message_element.innerHTML = 'Jogador '+this.symbols.options[this.symbols.turn_index]+' Ganhou!';
+        console.log('GAME END '+this.symbols.options[this.symbols.turn_index]);
+    },
+
+    is_game_over() {
+        return !this.board.includes('');
     },
 
     start: function(){
+        this.won_message_element.innerHTML = ''; 
         this.board.fill('');
         this.draw();
         this.gameover = false;
 
+    },
+
+    restart() {
+        if (this.is_game_over() || this.gameover) {
+            this.start();
+            console.log('this game has been restarted!')
+        } else if (confirm('Are you sure you want to restart this game?')) {
+            this.start();
+            console.log('this game has been restarted!')
+        }
     },
 
     check_win_seqs: function(symbol){
@@ -73,7 +114,10 @@ const tic_tac_toe = {
             content += '<div onclick="tic_tac_toe.make_play(' + i + ')">' + this.board[i] + '</div>';
         }
 
-        this.container_element.innerHTML = content;
+        //this.container_element.innerHTML = content;
+        this.container_element.innerHTML = this.board.map((element, index) => `<div onclick="tic_tac_toe.make_play('${index}')"> <span class="game-symbol game-symbol--${element}"></span> </div>`).reduce((content, current) => content + current);
+        this.player_x_element.innerHTML = "Vitórias do Jogador X: "+this.player_x_wins;
+        this.player_o_element.innerHTML = "Vitórias do Jogador O: "+this.player_o_wins;
     }
 
 };
